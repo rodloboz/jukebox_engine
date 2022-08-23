@@ -10,47 +10,13 @@ defmodule JukeboxEngine.SongTest do
     {:ok, song: song, user: user}
   end
 
-  describe "upvote/2" do
-    test "should add user to song upvotes", %{song: song, user: user} do
-      refute MapSet.member?(song.upvotes, user)
+  describe "update_position/2" do
+    test "should update the song position", %{song: song} do
+      assert song.position == nil
 
-      song = Song.upvote(song, user)
+      song = Song.update_position(song, 2)
 
-      assert MapSet.member?(song.upvotes, user)
-    end
-
-    test "should not upvote song twice by the same user", %{song: song, user: user} do
-      song = Song.upvote(song, user)
-      assert MapSet.size(song.upvotes) == 1
-
-      song = Song.upvote(song, user)
-      assert MapSet.size(song.upvotes) == 1
-    end
-  end
-
-  describe "downvote/2" do
-    test "should remove user from song upvotes", %{song: song, user: user} do
-      song = Song.upvote(song, user)
-
-      assert MapSet.member?(song.upvotes, user)
-
-      song = Song.downvote(song, user)
-
-      refute MapSet.member?(song.upvotes, user)
-    end
-  end
-
-  describe "upvotes_count/1" do
-    test "should return the total number of song upvotes", %{song: song, user: user} do
-      assert Song.upvotes_count(song) == 0
-
-      song = Song.upvote(song, user)
-
-      assert Song.upvotes_count(song) == 1
-
-      song = Song.downvote(song, user)
-
-      assert Song.upvotes_count(song) == 0
+      assert song.position == 2
     end
   end
 
@@ -61,6 +27,36 @@ defmodule JukeboxEngine.SongTest do
       song = Song.mark_as_played(song)
 
       assert song.played
+    end
+  end
+
+  describe "upvote/2" do
+    test "should add the user to the song votes", %{song: song, user: user} do
+      refute MapSet.member?(song.votes, user)
+
+      song = Song.upvote(song, user)
+
+      assert MapSet.member?(song.votes, user)
+    end
+
+    test "should not duplicate user votes", %{song: song, user: user} do
+      song = Song.upvote(song, user)
+      assert MapSet.size(song.votes) == 1
+
+      song = Song.upvote(song, user)
+      assert MapSet.size(song.votes) == 1
+    end
+  end
+
+  describe "downvote/2" do
+    test "should remove the user to the song votes", %{song: song, user: user} do
+      song = Song.upvote(song, user)
+
+      assert MapSet.member?(song.votes, user)
+
+      song = Song.downvote(song, user)
+
+      refute MapSet.member?(song.votes, user)
     end
   end
 end

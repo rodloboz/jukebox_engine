@@ -1,21 +1,34 @@
 defmodule JukeboxEngine.Playlist do
   @moduledoc false
 
-  alias JukeboxEngine.{Playlist, Song}
+  alias JukeboxEngine.{Song}
 
-  @enforce_keys [:songs, :played_songs]
-  defstruct [:songs, :played_songs]
+  def new, do: %{}
 
-  def new do
-    %Playlist{
-      songs: [],
-      played_songs: []
-    }
+  def add_song(playlist, %Song{src: key} = song) do
+    case Map.has_key?(playlist, key) do
+      true ->
+        {:error, :song_already_in_playlist}
+
+      false ->
+        song = Song.update_position(song, map_size(playlist))
+        {:ok, Map.put(playlist, key, song)}
+    end
   end
 
-  def add_song(playlist, %Song{} = song) do
-    songs = [song | playlist.songs]
+  # def upvote_song(playlist, %Song{} = song, %User{} = user) do
+  #   votes = MapSet.put(playlist.votes, Vote.new(song, user))
+  #   %{playlist | votes: votes}
+  # end
 
-    %{playlist | songs: songs}
-  end
+  # def downvote_song(playlist, %Song{} = song, %User{} = user) do
+  #   votes = MapSet.delete(playlist.votes, Vote.new(song, user))
+  #   %{playlist | votes: votes}
+  # end
+
+  # def mark_song_as_played(playlist, %Song{} = song) do
+  #   played_songs = MapSet.put(playlist.played_songs, song)
+
+  #   %{playlist | played_songs: played_songs}
+  # end
 end
