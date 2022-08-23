@@ -59,4 +59,19 @@ defmodule JukeboxEngine.SongTest do
       refute MapSet.member?(song.votes, user)
     end
   end
+
+  describe "upvotes_count/1" do
+    test "should return the number of song votes", %{song: song, user: user} do
+      assert Song.upvotes_count(song) == 0
+
+      song = Song.upvote(song, user)
+
+      assert Song.upvotes_count(song) == 1
+
+      another_user = User.new("9th Wonder")
+      song = Song.upvote(song, another_user)
+
+      assert Song.upvotes_count(song) == 2
+    end
+  end
 end

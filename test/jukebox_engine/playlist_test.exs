@@ -44,6 +44,53 @@ defmodule JukeboxEngine.PlaylistTest do
     end
   end
 
+  describe "next_song" do
+    test "should return the unplayed song added first when there are no votes", %{
+      playlist: playlist,
+      song: song
+    } do
+      another_song = Song.new("Two Can Win", 1.47, "https://youtu.be/n7nEY9izxJY")
+      {:ok, playlist} = Playlist.add_song(playlist, song)
+      {:ok, playlist} = Playlist.add_song(playlist, another_song)
+      next_song = Playlist.next_song(playlist)
+
+      assert_structs_equal(next_song, song, [:name, :length, :src])
+    end
+
+    test "should return the unplayed song with the highest number of votes", %{
+      playlist: playlist,
+      song: song,
+      user: user
+    } do
+      another_song = Song.new("Two Can Win", 1.47, "https://youtu.be/n7nEY9izxJY")
+      another_song = Song.upvote(another_song, user)
+
+      {:ok, playlist} = Playlist.add_song(playlist, song)
+      {:ok, playlist} = Playlist.add_song(playlist, another_song)
+
+      next_song = Playlist.next_song(playlist)
+
+      assert_structs_equal(next_song, another_song, [:name, :length, :src])
+    end
+
+    test "should return the unplayed song added first when the votes are the same", %{
+      playlist: playlist,
+      song: song,
+      user: user
+    } do
+      another_song = Song.new("Two Can Win", 1.47, "https://youtu.be/n7nEY9izxJY")
+      another_song = Song.upvote(another_song, user)
+      song = Song.upvote(song, user)
+
+      {:ok, playlist} = Playlist.add_song(playlist, song)
+      {:ok, playlist} = Playlist.add_song(playlist, another_song)
+
+      next_song = Playlist.next_song(playlist)
+
+      assert_structs_equal(next_song, song, [:name, :length, :src])
+    end
+  end
+
   # describe "upvote_song/3" do
   #   test "should add a new vote to the playlist votes", %{
   #     playlist: playlist,
